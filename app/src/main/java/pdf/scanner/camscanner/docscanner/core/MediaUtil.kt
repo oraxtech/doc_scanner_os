@@ -384,8 +384,11 @@ class MediaUtil {
                         size(2_097_152)
                     }
                     val image = Image.getInstance(compressedImageFile.path)
+
                     image.scaleToFit(document.pageSize.width, document.pageSize.height)
-                    image.setAbsolutePosition(0.5f, 0.5f)
+                    val x = (PageSize.A4.width - image.scaledWidth) / 2
+                    val y = (PageSize.A4.height - image.scaledHeight) / 2
+                    image.setAbsolutePosition(x, y)
                     document.newPage()
                     document.add(image)
 
