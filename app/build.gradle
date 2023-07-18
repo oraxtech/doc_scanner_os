@@ -41,6 +41,15 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    implementation 'com.itextpdf.android:kernel-android:7.2.2'
+    //Library to pick image from gallery and camera
+    implementation 'com.github.jrvansuita:PickImage:v3.0.2'
+
+    implementation 'com.karumi:dexter:6.2.3'
+
+    //itext Lib
+    implementation 'com.itextpdf:itextg:5.5.10'
+
+    //image compress lib
+    implementation 'id.zelory:compressor:3.0.1'
 
 }

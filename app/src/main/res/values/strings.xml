@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">My Application</string>
+    <string name="rational_dialogue_box_text">It looks like you need to turn on permissions from settings</string>
+    <string name="rational_dialogue_button_text_go_to_settings">Go to settings</string>
+    <string name="rational_dialogue_button_text_cancel">cancel</string>
+    <string name="text_select">Choose</string>
+    <string name="text_camera">Camera</string>
+    <string name="text_gallery">Gallery</string>
+    <string name="text_cancel">Cancel</string>
+    <string name="activity_convert_to_pdf_view_pager_description">viewPager</string>
+    <string name="text_progress_bar_please_wait">Please wait</string>
+    <string name="text_progress_dialog_converting_to_pdf">Converting...</string>
 </resources>
