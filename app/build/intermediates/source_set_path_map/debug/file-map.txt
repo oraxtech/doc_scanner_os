@@ -1,0 +1,32 @@
+pdf.scanner.camscanner.docscanner.app-appcompat-1.6.1-0 C:\Users\LENOVO\.gradle\caches\transforms-3\027d8b2b28dddb2adeadc84b6e69b9f1\transformed\appcompat-1.6.1\res
+pdf.scanner.camscanner.docscanner.app-recyclerview-1.1.0-1 C:\Users\LENOVO\.gradle\caches\transforms-3\1c92ae0882f2a105653652ca2c86cbb9\transformed\recyclerview-1.1.0\res
+pdf.scanner.camscanner.docscanner.app-savedstate-1.2.0-2 C:\Users\LENOVO\.gradle\caches\transforms-3\27a76b0bbfd4d4d58382e2d142c2a5af\transformed\savedstate-1.2.0\res
+pdf.scanner.camscanner.docscanner.app-lifecycle-livedata-core-2.5.1-3 C:\Users\LENOVO\.gradle\caches\transforms-3\2d1669e64cde1d036d0f88ad87609db5\transformed\lifecycle-livedata-core-2.5.1\res
+pdf.scanner.camscanner.docscanner.app-core-1.9.0-4 C:\Users\LENOVO\.gradle\caches\transforms-3\35a93ab88a7aea21e87129f4e1c885c7\transformed\core-1.9.0\res
+pdf.scanner.camscanner.docscanner.app-fragment-1.3.6-5 C:\Users\LENOVO\.gradle\caches\transforms-3\403f6df087c66e2ad66a118da82fcc0f\transformed\fragment-1.3.6\res
+pdf.scanner.camscanner.docscanner.app-emoji2-1.2.0-6 C:\Users\LENOVO\.gradle\caches\transforms-3\489557fe98609c500e97db1ce0662960\transformed\emoji2-1.2.0\res
+pdf.scanner.camscanner.docscanner.app-drawerlayout-1.1.1-7 C:\Users\LENOVO\.gradle\caches\transforms-3\51721bfe45a930ddb49b6a48f3571138\transformed\drawerlayout-1.1.1\res
+pdf.scanner.camscanner.docscanner.app-material-1.9.0-8 C:\Users\LENOVO\.gradle\caches\transforms-3\55495fd46bd1c92e44dbf3f1b0ddd4df\transformed\material-1.9.0\res
+pdf.scanner.camscanner.docscanner.app-lifecycle-viewmodel-2.5.1-9 C:\Users\LENOVO\.gradle\caches\transforms-3\58ca975e837b6c747a82b3ebde7e823e\transformed\lifecycle-viewmodel-2.5.1\res
+pdf.scanner.camscanner.docscanner.app-annotation-experimental-1.3.0-10 C:\Users\LENOVO\.gradle\caches\transforms-3\6b1a48ca6673d8b0c0ec0fdd26dbe234\transformed\annotation-experimental-1.3.0\res
+pdf.scanner.camscanner.docscanner.app-viewpager2-1.0.0-11 C:\Users\LENOVO\.gradle\caches\transforms-3\6c535f66c58d0c4b7bac43d58ec1b405\transformed\viewpager2-1.0.0\res
+pdf.scanner.camscanner.docscanner.app-appcompat-resources-1.6.1-12 C:\Users\LENOVO\.gradle\caches\transforms-3\6edf2cdc5fec16a15342b94fcd67e67c\transformed\appcompat-resources-1.6.1\res
+pdf.scanner.camscanner.docscanner.app-coordinatorlayout-1.1.0-13 C:\Users\LENOVO\.gradle\caches\transforms-3\75e7c93b1d4a2493f03503549b0b69ad\transformed\coordinatorlayout-1.1.0\res
+pdf.scanner.camscanner.docscanner.app-activity-1.6.0-14 C:\Users\LENOVO\.gradle\caches\transforms-3\7e8b4375b1e8f6345d9d7da435cf3b84\transformed\activity-1.6.0\res
+pdf.scanner.camscanner.docscanner.app-core-ktx-1.9.0-15 C:\Users\LENOVO\.gradle\caches\transforms-3\98b595fc000c119a9ee555be6ad93f50\transformed\core-ktx-1.9.0\res
+pdf.scanner.camscanner.docscanner.app-emoji2-views-helper-1.2.0-16 C:\Users\LENOVO\.gradle\caches\transforms-3\a04c41a2c5372702bd662805ae4ac540\transformed\emoji2-views-helper-1.2.0\res
+pdf.scanner.camscanner.docscanner.app-lifecycle-viewmodel-savedstate-2.5.1-17 C:\Users\LENOVO\.gradle\caches\transforms-3\ac1457766700b7e3f08919d5cd5556ca\transformed\lifecycle-viewmodel-savedstate-2.5.1\res
+pdf.scanner.camscanner.docscanner.app-constraintlayout-2.1.4-18 C:\Users\LENOVO\.gradle\caches\transforms-3\b680922c1a74e68073e69a6db0cd504d\transformed\constraintlayout-2.1.4\res
+pdf.scanner.camscanner.docscanner.app-startup-runtime-1.1.1-19 C:\Users\LENOVO\.gradle\caches\transforms-3\bc62c1958fce2776011259ae4f379981\transformed\startup-runtime-1.1.1\res
+pdf.scanner.camscanner.docscanner.app-lifecycle-process-2.4.1-20 C:\Users\LENOVO\.gradle\caches\transforms-3\d7233a164cd4abb4f3d7e6cd422a6fc7\transformed\lifecycle-process-2.4.1\res
+pdf.scanner.camscanner.docscanner.app-cardview-1.0.0-21 C:\Users\LENOVO\.gradle\caches\transforms-3\d82c6905bd6ce3ae15be70b3303d63b2\transformed\cardview-1.0.0\res
+pdf.scanner.camscanner.docscanner.app-lifecycle-runtime-2.5.1-22 C:\Users\LENOVO\.gradle\caches\transforms-3\e3c1dc24edecba5a60ad7118309a9472\transformed\lifecycle-runtime-2.5.1\res
+pdf.scanner.camscanner.docscanner.app-transition-1.2.0-23 C:\Users\LENOVO\.gradle\caches\transforms-3\f437727df117a669853138997da87123\transformed\transition-1.2.0\res
+pdf.scanner.camscanner.docscanner.app-pngs-24 D:\Fakhar android\doc_scanner_os\app\build\generated\res\pngs\debug
+pdf.scanner.camscanner.docscanner.app-resValues-25 D:\Fakhar android\doc_scanner_os\app\build\generated\res\resValues\debug
+pdf.scanner.camscanner.docscanner.app-rs-26 D:\Fakhar android\doc_scanner_os\app\build\generated\res\rs\debug
+pdf.scanner.camscanner.docscanner.app-packageDebugResources-27 D:\Fakhar android\doc_scanner_os\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+pdf.scanner.camscanner.docscanner.app-packageDebugResources-28 D:\Fakhar android\doc_scanner_os\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+pdf.scanner.camscanner.docscanner.app-merged_res-29 D:\Fakhar android\doc_scanner_os\app\build\intermediates\merged_res\debug
+pdf.scanner.camscanner.docscanner.app-debug-30 D:\Fakhar android\doc_scanner_os\app\src\debug\res
+pdf.scanner.camscanner.docscanner.app-main-31 D:\Fakhar android\doc_scanner_os\app\src\main\res

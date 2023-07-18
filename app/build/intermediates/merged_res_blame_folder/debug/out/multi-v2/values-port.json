@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "pdf.scanner.camscanner.docscanner.app-mergeDebugResources-27:/values-port/values-port.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\LENOVO\\.gradle\\caches\\transforms-3\\027d8b2b28dddb2adeadc84b6e69b9f1\\transformed\\appcompat-1.6.1\\res\\values-port\\values-port.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "55",
+                        "endOffsets": "106"
+                    }
+                }
+            ]
+        }
+    ]
+}
