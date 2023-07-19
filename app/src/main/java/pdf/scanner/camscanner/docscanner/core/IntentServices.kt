@@ -11,11 +11,16 @@ class IntentServices {
         private var bitmap: Bitmap? = null
         private var isImageFromPDFConvertorActivity = false
         private var isActivityForResult = false
+        private var selectedTool: SelectedTool? = null
 
         fun setIsActivityForResult(isActivityForResult : Boolean){
             Companion.isActivityForResult = isActivityForResult
         }
 
+        fun setSelectedTool(selectedTool: SelectedTool){
+            this.selectedTool = selectedTool
+        }
+        fun getSelectTool() = selectedTool
         fun getIsActivityForResult() = isActivityForResult
 
         fun setIsImageFromPDFActivity(isImageFromPDFFromImageActivity: Boolean){

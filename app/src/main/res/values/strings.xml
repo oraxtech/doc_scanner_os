@@ -10,4 +10,9 @@
     <string name="activity_convert_to_pdf_view_pager_description">viewPager</string>
     <string name="text_progress_bar_please_wait">Please wait</string>
     <string name="text_progress_dialog_converting_to_pdf">Converting...</string>
+    <string name="fragment_tools_name_text_merge_pdfs">Merge PDFs</string>
+    <string name="fragment_tools_name_text_extract_pdf_pages">Extract PDF pages</string>
+    <string name="fragment_tools_name_text_protect_pdf">Protect PDF</string>
+    <string name="fragment_tools_name_text_reorder_pdf">Reorder PDF</string>
+    <string name="fragment_tools_name_text_import_pdfs">Import PDFs</string>
 </resources>

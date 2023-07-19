@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="fragments_tools_recycler_view_item_padding">20</dimen>
+    <dimen name="fragment_tools_image_view_min_height_width">50</dimen>
+    <dimen name="fragments_tools_recycler_view_name_margin_start">10</dimen>
+</resources>
