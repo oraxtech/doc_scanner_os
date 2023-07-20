@@ -3,48 +3,55 @@ package pdf.scanner.camscanner.docscanner.activities
 import android.content.ContentValues.TAG
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.pdf.PdfRenderer
 import android.net.Uri
-import android.nfc.Tag
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.Settings
+import android.os.ParcelFileDescriptor
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.itextpdf.text.Document
 import com.itextpdf.text.DocumentException
 import com.itextpdf.text.pdf.PdfCopy
-import com.itextpdf.text.pdf.PdfDocument
+import com.itextpdf.text.pdf.PdfImportedPage
 import com.itextpdf.text.pdf.PdfReader
-import com.itextpdf.text.pdf.PdfWriter
 import com.vansuita.pickimage.bundle.PickSetup
 import com.vansuita.pickimage.dialog.PickImageDialog
 import com.vansuita.pickimage.listeners.IPickClick
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import pdf.scanner.camscanner.docscanner.R
 import pdf.scanner.camscanner.docscanner.core.*
 import pdf.scanner.camscanner.docscanner.databinding.ActivityMainBinding
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
+import java.security.Security
+
 
 class MainActivity : AppCompatActivity() {
     private var floatingButton: FloatingActionButton? = null
     private var pickImageDialog: PickImageDialog? = null
     private lateinit var binding: ActivityMainBinding
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setRecyclerView()
+        Security.insertProviderAt(BouncyCastleProvider(), 1)
         floatingButton = findViewById(R.id.main_activity_floating_button)
         floatingButton!!.setOnClickListener {
             onFloatingButtonPressed()
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun setRecyclerView() {
         val adapter = ToolsFragmentRecyclerViewAdapter(
             applicationContext,
@@ -146,6 +153,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun pickPDFFromDevice() {
         val pdfIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
@@ -157,6 +165,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private val pdfFromDevice =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == RESULT_OK) {
@@ -182,6 +191,18 @@ class MainActivity : AppCompatActivity() {
                         }else{
                             extractPagesFromPdf(it.data!!.data!!)
                         }
+                    }SelectedTool.REORDER -> {
+                    if (it.data?.clipData != null) {
+                        reorderPdfPages(it.data?.clipData?.getItemAt(0)!!.uri)
+                    }else{
+                        reorderPdfPages(it.data!!.data!!)
+                    }
+                    }SelectedTool.PROTECT -> {
+                    if (it.data?.clipData != null) {
+                        protectPdf(it.data?.clipData?.getItemAt(0)!!.uri,"user","owner")
+                    }else{
+                        protectPdf(it.data!!.data!!,"user","owner")
+                    }
                     }
                     else -> {
 
@@ -226,11 +247,13 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun extractPagesFromPdf(uri: Uri) {
         var inputPdf: InputStream? = null
         try {
             val file = ExternalStorageUtil.getOutputFile(this, "My PDFs/Extracted")
             val fileOutputStream = FileOutputStream(file)
+            generateThumbnails(uri)
             inputPdf = contentResolver.openInputStream(uri)
             inputPdf?.let { inputStream ->
                 val reader = PdfReader(inputStream)
@@ -267,6 +290,172 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
             // Handle the error appropriately
         } finally {
+            inputPdf?.close()
+        }
+    }
+
+    private fun reorderPdfPages(uri: Uri) {
+        var inputPdf: InputStream? = null
+        var document: Document? = null
+        var copy: PdfCopy? = null
+
+        try {
+            val file = ExternalStorageUtil.getOutputFile(this, "My PDFs/Reordered")
+            val fileOutputStream = FileOutputStream(file)
+            inputPdf = contentResolver.openInputStream(uri)
+            inputPdf?.let { inputStream ->
+                val reader = PdfReader(inputStream,"owner".toByteArray())
+                val totalPages = reader.numberOfPages
+
+                if (totalPages >= 2) {
+                    val newPageOrder = (1..totalPages).toList().shuffled()
+
+                    document = Document()
+                    copy = PdfCopy(document, fileOutputStream)
+                    document!!.open()
+
+                    for (newPageIndex in newPageOrder) {
+                        if (newPageIndex in 1..totalPages) {
+                            val page = copy!!.getImportedPage(reader, newPageIndex)
+                            copy!!.addPage(page)
+                        }
+                    }
+
+                    // Show a message or perform any other action after successful reordering
+                    Toast.makeText(this, "Pages reordered successfully", Toast.LENGTH_SHORT).show()
+                    Log.d("PDF Reorder", "Pages reordered successfully!")
+                } else {
+                    // Handle the case when the PDF contains fewer than 2 pages
+                    Toast.makeText(
+                        this,
+                        "The PDF should contain at least 2 pages for reordering.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    Log.d("PDF Reorder", "The PDF should contain at least 2 pages for reordering.")
+                }
+
+                reader.close()
+            }
+        } catch (e: DocumentException) {
+            e.printStackTrace()
+            // Handle the error appropriately
+        } catch (e: IOException) {
+            e.printStackTrace()
+            // Handle the error appropriately
+        } finally {
+            copy?.close()
+            document?.close()
+            inputPdf?.close()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    private fun generateThumbnails(pdfUri: Uri) {
+        var renderer: PdfRenderer? = null
+        var fileDescriptor: ParcelFileDescriptor? = null
+
+        try {
+           // val pdfFile = File(pdfUri)
+             fileDescriptor = this.contentResolver.openFileDescriptor(pdfUri, "r")
+
+            if (fileDescriptor != null) {
+                renderer = PdfRenderer(fileDescriptor)
+
+                for (pageNumber in 0 until renderer.pageCount) {
+                    val page = renderer.openPage(pageNumber)
+
+                    // Scale the thumbnail image as needed
+                    val scale = 0.5f
+                    val width = (page.width * scale).toInt()
+                    val height = (page.height * scale).toInt()
+
+                    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+                    page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+
+                    // Generate thumbnail filename (e.g., page_1_thumbnail.jpg)
+                    val thumbnailFileName = "page_${pageNumber + 1}_thumbnail.jpg"
+                    val file = ExternalStorageUtil.getImageFile("My PDFs/thumbnails",thumbnailFileName)
+                    val fileOutputStream = FileOutputStream(file)
+                    // Save the thumbnail image to the output directory
+                 //   val thumbnailFile = File(outputDirectory, thumbnailFileName)
+                    fileOutputStream.use { outputStream ->
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 85, outputStream)
+                    }
+
+                    page.close()
+                }
+
+                // Show a message or perform any other action after successful thumbnail generation
+                Log.d("PDF Thumbnails", "Thumbnails generated successfully!")
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            // Handle the error appropriately
+        } finally {
+            renderer?.close()
+            fileDescriptor?.close()
+        }
+    }
+
+//    fun protectPdf(inputPdfPath: String, userPassword: String, ownerPassword: String) {
+//        val reader = PdfReader(inputPdfPath)
+//        val outputStream = FileOutputStream(inputPdfPath)
+//        val document = Document()
+//       // val writerPropertiesManager = WriterP
+//        // Set the encryption options
+//        val copy  = PdfCopy(document, outputStream)
+//
+//        copy.setEncryption(userPassword.toByteArray(), ownerPassword.toByteArray(), PdfWriter.ALLOW_PRINTING, PdfWriter.ENCRYPTION_AES_256)
+//         document.open()
+//
+//        reader.close()
+//        outputStream.close()
+//    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    fun protectPdf(pdfUri: Uri, userPassword: String, ownerPassword: String) {
+       // var renderer: PdfRenderer? = null
+        var inputPdf: InputStream? = null
+
+       // var fileDescriptor: ParcelFileDescriptor? = null
+
+        try {
+            inputPdf = contentResolver.openInputStream(pdfUri)
+            inputPdf?.let { inputStream ->
+                val reader = PdfReader(inputStream)
+                val totalPages = reader.numberOfPages
+
+                val document = Document()
+               // val outputStream = FileOutputStream(outputPdfPath)
+                val file = ExternalStorageUtil.getOutputFile(this, "My PDFs/Protected")
+                val fileOutputStream = FileOutputStream(file)
+                val copy = PdfCopy(document, fileOutputStream)
+
+                // Set the encryption options
+                copy.setEncryption(userPassword.toByteArray(), ownerPassword.toByteArray(), PdfCopy.ALLOW_SCREENREADERS, PdfCopy.ENCRYPTION_AES_256)
+
+                document.open()
+
+                // Copy pages from the original PDF to the protected PDF
+                for (pageNumber in 1 until totalPages) {
+                  //  val page = renderer!!.openPage(pageNumber)
+                    val importedPage : PdfImportedPage = copy.getImportedPage(reader,pageNumber)
+                    copy.addPage(importedPage)
+                 //   page.close()
+                }
+
+                document.close()
+                fileOutputStream.close()
+                Toast.makeText(this, "PDF Protected successfully", Toast.LENGTH_SHORT).show()
+                // Show a message or perform any other action after successful protection
+                // ...
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            // Handle the error appropriately
+        } finally {
+//            renderer?.close()
+//            fileDescriptor?.close()
             inputPdf?.close()
         }
     }

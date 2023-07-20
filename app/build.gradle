@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "pdf.scanner.camscanner.docscanner"
-        minSdk 24
+        minSdk 21
         targetSdk 33
         versionCode 1
         versionName "1.0"
@@ -51,8 +51,21 @@ dependencies {
 
     //itext Lib
     implementation 'com.itextpdf:itextg:5.5.10'
+//    implementation 'com.itextpdf:itext7-core:7.1.8'
+//    implementation 'com.itextpdf:kernel:7.1.8'
+//    implementation 'com.itextpdf:layout:7.1.8'
+//    implementation 'com.itextpdf:io:7.1.8'
 
     //image compress lib
     implementation 'id.zelory:compressor:3.0.1'
+
+    //appache pdfbox
+    implementation 'com.tom-roush:pdfbox-android:2.0.27.0'
+
+    //spongycastle
+    implementation 'com.madgag.spongycastle:core:1.58.0.0'
+    implementation 'com.madgag.spongycastle:prov:1.58.0.0'
+    implementation 'com.madgag.spongycastle:pkix:1.54.0.0'
+    implementation 'com.madgag.spongycastle:pg:1.54.0.0'
 
 }

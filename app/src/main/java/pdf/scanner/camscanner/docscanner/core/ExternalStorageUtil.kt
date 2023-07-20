@@ -30,8 +30,8 @@ class ExternalStorageUtil {
             }
         }
 
-        fun getImageFile(context: Context): File? {
-            val root: File = File(context.getExternalFilesDir(null), "Image Doc Scanner")
+        fun getImageFile(folderName: String,fileName: String): File? {
+            val root: File = File("${Environment.getExternalStorageDirectory()}/Documents/$folderName/")
 
             var isFolderCreated: Boolean = true
 
@@ -40,8 +40,8 @@ class ExternalStorageUtil {
             }
 
             return if (isFolderCreated) {
-                val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-                val fileName = "JPG_$timestamp.jpg"
+//                val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+//                val fileName = "JPG_$timestamp.jpg"
                 File(root, fileName)
             } else {
                 null

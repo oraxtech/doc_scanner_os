@@ -357,7 +357,7 @@ class MediaUtil {
 //        }
 
         fun createPdf(context: Context, bitmaps: List<Bitmap>) {
-            val file = ExternalStorageUtil.getOutputFile(context, "My PDFs")
+            val file = ExternalStorageUtil.getOutputFile(context, "My PDFs/Images to PDF")
             val fileOutputStream = FileOutputStream(file)
 
             //  val pageSize = PageSize.A4
