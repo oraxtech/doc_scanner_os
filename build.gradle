@@ -31,6 +31,6 @@ allprojects {
         google()
         mavenCentral()
         maven {url "https://repo.itextsupport.com/android"}
-        maven { url "https://jitpack.io" }
+       maven { url "https://jitpack.io" }
     }
 }

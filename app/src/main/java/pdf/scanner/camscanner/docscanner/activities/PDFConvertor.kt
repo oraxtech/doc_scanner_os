@@ -37,7 +37,7 @@ class PDFConvertor : AppCompatActivity() {
         viewPager = findViewById(R.id.pdf_converter_layout_view_pager)
         convertButton = findViewById(R.id.pdf_converter_layout_button_convert)
         convertButton.setOnClickListener{
-            onConvertButtonPressed()
+         //   onConvertButtonPressed()
         }
         setUpProgressBar()
         setUpToolBar()
@@ -73,31 +73,31 @@ class PDFConvertor : AppCompatActivity() {
             PDFConverterActivityViewPagerAdapter(this@PDFConvertor, imagesList)
     }
 
-    private fun onConvertButtonPressed(){
-        progressDialog.setMessage(getString(R.string.text_progress_dialog_converting_to_pdf))
-        progressDialog.show()
-        val bitmapList = ArrayList<Bitmap>()
-        for (i in imagesList){
-            bitmapList.add(if (i.editedBitmap != null) {
-                i.editedBitmap!!
-            } else {
-                i.bitmap!!
-            })
-        }
-        val handler = Handler(Looper.getMainLooper())
-        CoroutineScope(Dispatchers.IO).launch  {
-            MediaUtil.createPdf(applicationContext,bitmapList)
-            Log.e(ContentValues.TAG, "Converted...")
-            progressDialog.dismiss()
-            val uri = Uri.parse(
-                "${Environment.getExternalStorageDirectory().path}/Documents/My PDFs/"
-            )
-            val intent = Intent(Intent.ACTION_VIEW)
-
-            intent.setDataAndType(uri, "*/*")
-            startActivity(Intent.createChooser(intent, "Open folder"))}
-        handler.post{
-            Toast.makeText(this, "Converted...", Toast.LENGTH_SHORT).show()
-        }
-    }
+//    private fun onConvertButtonPressed(){
+//        progressDialog.setMessage(getString(R.string.text_progress_dialog_converting_to_pdf))
+//        progressDialog.show()
+//        val bitmapList = ArrayList<Bitmap>()
+//        for (i in imagesList){
+//            bitmapList.add(if (i.editedBitmap != null) {
+//                i.editedBitmap!!
+//            } else {
+//                i.bitmap!!
+//            })
+//        }
+//        val handler = Handler(Looper.getMainLooper())
+//        CoroutineScope(Dispatchers.IO).launch  {
+//            MediaUtil.createPdf(applicationContext,bitmapList)
+//            Log.e(ContentValues.TAG, "Converted...")
+//            progressDialog.dismiss()
+//            val uri = Uri.parse(
+//                "${Environment.getExternalStorageDirectory().path}/Documents/My PDFs/"
+//            )
+//            val intent = Intent(Intent.ACTION_VIEW)
+//
+//            intent.setDataAndType(uri, "*/*")
+//            startActivity(Intent.createChooser(intent, "Open folder"))}
+//        handler.post{
+//            Toast.makeText(this, "Converted...", Toast.LENGTH_SHORT).show()
+//        }
+//    }
 }
