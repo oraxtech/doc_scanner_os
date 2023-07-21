@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
+import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,6 +25,7 @@ import com.vansuita.pickimage.bundle.PickSetup
 import com.vansuita.pickimage.dialog.PickImageDialog
 import com.vansuita.pickimage.listeners.IPickClick
 import org.bouncycastle.jce.provider.BouncyCastleProvider
+import pdf.scanner.camscanner.docscanner.BuildConfig
 import pdf.scanner.camscanner.docscanner.R
 import pdf.scanner.camscanner.docscanner.core.*
 import pdf.scanner.camscanner.docscanner.databinding.ActivityMainBinding
@@ -51,13 +53,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun setRecyclerView() {
         val adapter = ToolsFragmentRecyclerViewAdapter(
             applicationContext,
             Constants.getToolsFragmentItemsList(applicationContext)
         ) {
             IntentServices.setSelectedTool(it)
+//          if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)  {
+//                val uri = Uri.parse("package:${BuildConfig.APPLICATION_ID}")
+//
+//                startActivity(
+//                    Intent(
+//                        Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+//
+//            )
+//            )
+//        }
             val permissionsList = listOf(
                 android.Manifest.permission.READ_EXTERNAL_STORAGE,
                 android.Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -162,8 +173,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         pdfFromDevice.launch(pdfIntent)
+       // documentPicker.launch(arrayOf("application/pdf"))
 
     }
+//    private val documentPicker = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()){
+//        if(it.isNotEmpty()){
+//            Log.e("it","Running")
+//        }
+//    }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private val pdfFromDevice =
