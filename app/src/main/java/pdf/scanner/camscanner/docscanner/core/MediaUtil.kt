@@ -224,11 +224,22 @@ class MediaUtil {
                     }
                     filePath = getDataColumn(context, contentUri, selection, selectionArgs)
                 } else if (isDownloadsDocument(uri)) { // DownloadsProvider
-                    val contentUri = ContentUris.withAppendedId(
-                        Uri.parse("content://downloads/public_downloads"),
-                        java.lang.Long.valueOf(documentId)
-                    )
-                    filePath = getDataColumn(context, contentUri, null, null)
+                    try {
+                        val documentIdDownloads = DocumentsContract.getDocumentId(uri)
+                        val numericPart = documentIdDownloads.substringAfterLast(":") // Extract the numeric part after the last ':'
+                        Log.e("numericPart",numericPart)
+                        val contentUri = ContentUris.withAppendedId(
+                            Uri.parse("content://downloads/public_downloads"),
+                            java.lang.Long.valueOf(numericPart)
+                        )
+                        filePath = getDataColumn(context, contentUri, null, null)
+                        Log.e("filePath",filePath.isNullOrEmpty().toString())
+                    } catch (e: NumberFormatException) {
+                        val documentIdDownloads = DocumentsContract.getDocumentId(uri)
+                        Log.e("documentIdDownloads",documentIdDownloads)
+                        e.printStackTrace()
+                        // Handle the error appropriately or check the value of "documentId"
+                    }
                 } else if (isExternalStorageDocument(uri)) {
                     // ExternalStorageProvider
                     val docId = DocumentsContract.getDocumentId(uri)

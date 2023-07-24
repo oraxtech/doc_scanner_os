@@ -21,6 +21,7 @@ import com.itextpdf.text.DocumentException
 import com.itextpdf.text.pdf.PdfCopy
 import com.itextpdf.text.pdf.PdfImportedPage
 import com.itextpdf.text.pdf.PdfReader
+
 import com.vansuita.pickimage.bundle.PickSetup
 import com.vansuita.pickimage.dialog.PickImageDialog
 import com.vansuita.pickimage.listeners.IPickClick
