@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.itextpdf.kernel.pdf.PdfDocument
+import com.itextpdf.kernel.pdf.PdfPage
 import com.itextpdf.kernel.pdf.PdfReader
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.kernel.pdf.ReaderProperties
@@ -37,7 +38,6 @@ class MainActivity : AppCompatActivity() {
     private var pickImageDialog: PickImageDialog? = null
     private lateinit var binding: ActivityMainBinding
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -161,7 +161,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun pickPDFFromDevice() {
         val pdfIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
@@ -179,7 +178,6 @@ class MainActivity : AppCompatActivity() {
 //        }
 //    }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private val pdfFromDevice =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == RESULT_OK) {
@@ -203,22 +201,27 @@ class MainActivity : AppCompatActivity() {
                     SelectedTool.EXTRACT -> {
                         val listOfUri: ArrayList<Uri> = ArrayList()
                         if (it.data?.clipData != null) {
-                           // extractPagesFromPdf(it.data?.clipData?.getItemAt(0)!!.uri, listOf(1,3,6))
+                            // extractPagesFromPdf(it.data?.clipData?.getItemAt(0)!!.uri, listOf(1,3,6))
                             Toast.makeText(this, "Select only one pdf", Toast.LENGTH_SHORT)
                                 .show()
-                        }else{
+                        } else {
                             listOfUri.add(it.data!!.data!!)
                             val listOfInputStream = createInputStreamList(listOfUri)
-                            extractPagesFromPdf(listOfInputStream, listOf(1,4,5))
+                            extractPagesFromPdf(listOfInputStream, listOf(1, 4, 5))
                         }
                     }
-//                    SelectedTool.REORDER -> {
-//                    if (it.data?.clipData != null) {
-//                        reorderPdfPages(it.data?.clipData?.getItemAt(0)!!.uri)
-//                    }else{
-//                        reorderPdfPages(it.data!!.data!!)
-//                    }
-//                    }SelectedTool.PROTECT -> {
+                    SelectedTool.REORDER -> {
+                        val listOfUri: ArrayList<Uri> = ArrayList()
+                        if (it.data?.clipData != null) {
+                            Toast.makeText(this, "Select only one pdf", Toast.LENGTH_SHORT)
+                                .show()
+                        } else {
+                            listOfUri.add(it.data!!.data!!)
+                            val listOfInputStream = createInputStreamList(listOfUri)
+                            reorderPdfPages(listOfInputStream, listOf(1, 4, 5))
+                        }
+                    }
+//                    SelectedTool.PROTECT -> {
 //                    if (it.data?.clipData != null) {
 //                        protectPdf(it.data?.clipData?.getItemAt(0)!!.uri,"user","owner")
 //                    }else{
@@ -254,13 +257,23 @@ class MainActivity : AppCompatActivity() {
             val fileOutputStream = FileOutputStream(file)
 
             val pdfDocument =
-                PdfDocument(PdfReader(listOfInputStreamPdf[0], ReaderProperties().setPassword("owner".toByteArray())), PdfWriter(fileOutputStream))
+                PdfDocument(
+                    PdfReader(
+                        listOfInputStreamPdf[0],
+                        ReaderProperties().setPassword("owner".toByteArray())
+                    ), PdfWriter(fileOutputStream)
+                )
             val merger = PdfMerger(pdfDocument)
 
             for (i in listOfInputStreamPdf.indices) {
-                val pdfNumber = i+1
-                if(pdfNumber in listOfInputStreamPdf.indices) {
-                    val mergePdfDocument = PdfDocument(PdfReader(listOfInputStreamPdf[pdfNumber],ReaderProperties().setPassword("owner".toByteArray())))
+                val pdfNumber = i + 1
+                if (pdfNumber in listOfInputStreamPdf.indices) {
+                    val mergePdfDocument = PdfDocument(
+                        PdfReader(
+                            listOfInputStreamPdf[pdfNumber],
+                            ReaderProperties().setPassword("owner".toByteArray())
+                        )
+                    )
                     merger.merge(mergePdfDocument, 1, mergePdfDocument.numberOfPages)
                     mergePdfDocument.close()
                     listOfInputStreamPdf[pdfNumber].close()
@@ -280,40 +293,44 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-//    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    private fun extractPagesFromPdf(listOfInputStreamPdf: List<InputStream>,pageNumbers: List<Int>) {
-    val file = ExternalStorageUtil.getOutputFile(this, "My PDFs/Merged")
-    val fileOutputStream = FileOutputStream(file)
+    //    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    private fun extractPagesFromPdf(
+        listOfInputStreamPdf: List<InputStream>,
+        pageNumbers: List<Int>
+    ) {
+        val file = ExternalStorageUtil.getOutputFile(this, "My PDFs/Merged")
+        val fileOutputStream = FileOutputStream(file)
 
-    val reader = PdfReader(listOfInputStreamPdf[0])
+        val reader = PdfReader(listOfInputStreamPdf[0])
 
-    // Create a PdfDocument object for the input PDF
-    val document = PdfDocument(reader)
+        // Create a PdfDocument object for the input PDF
+        val document = PdfDocument(reader)
 
-    // Create a PdfWriter object for the output PDF
-    val writer = PdfWriter(fileOutputStream)
+        // Create a PdfWriter object for the output PDF
+        val writer = PdfWriter(fileOutputStream)
 
-    // Create a new PdfDocument object for the output PDF
-    val outputDocument = PdfDocument(writer)
+        // Create a new PdfDocument object for the output PDF
+        val outputDocument = PdfDocument(writer)
 
-    try {
-        // Iterate through the page numbers and copy them to the output document
-        for (pageNum in pageNumbers) {
-            if (pageNum >= 1 && pageNum <= document.numberOfPages) {
-                val page = document.getPage(pageNum)
-                outputDocument.addPage(page.copyTo(outputDocument))
+        try {
+            // Iterate through the page numbers and copy them to the output document
+            for (pageNum in pageNumbers) {
+                if (pageNum >= 1 && pageNum <= document.numberOfPages) {
+                    val page = document.getPage(pageNum)
+                    outputDocument.addPage(page.copyTo(outputDocument))
+                }
             }
+            listOfInputStreamPdf[0].close()
+            Toast.makeText(this, "Extracted using itext 7", Toast.LENGTH_SHORT).show()
+
+        } finally {
+            // Close all the PdfDocument objects to release resources
+            outputDocument.close()
+            document.close()
         }
-        Toast.makeText(this, "Extracted using itext 7", Toast.LENGTH_SHORT).show()
-
-    } finally {
-        // Close all the PdfDocument objects to release resources
-        outputDocument.close()
-        document.close()
-    }
 
 
-    //        var inputPdf: InputStream? = null
+        //        var inputPdf: InputStream? = null
 //        try {
 //            val file = ExternalStorageUtil.getOutputFile(this, "My PDFs/Extracted")
 //            val fileOutputStream = FileOutputStream(file)
@@ -356,7 +373,36 @@ class MainActivity : AppCompatActivity() {
 //        } finally {
 //            inputPdf?.close()
 //        }
-   }
+    }
+
+    private fun reorderPdfPages(listOfInputStreamPdf: List<InputStream>, newPageOrder: List<Int>) {
+        val file = ExternalStorageUtil.getOutputFile(this, "My PDFs/Reordered")
+        val fileOutputStream = FileOutputStream(file)
+
+        val reader = PdfReader(listOfInputStreamPdf[0])
+
+        // Create a PdfDocument object for the input PDF
+        val document = PdfDocument(reader)
+
+        // Create a PdfWriter object for the output PDF
+        val writer = PdfWriter(fileOutputStream)
+
+        // Create a new PdfDocument object for the output PDF
+        val outputDocument = PdfDocument(writer)
+        outputDocument.initializeOutlines()
+        val totalPages = document.numberOfPages
+
+        if (totalPages >= 2) {
+            val tempPages = (1..totalPages).toList().shuffled()
+
+            document.copyPagesTo(tempPages, outputDocument)
+        }
+
+        document.close()
+        outputDocument.close()
+        Toast.makeText(this, "Reordered using itext 7", Toast.LENGTH_SHORT).show()
+
+    }
 //
 //    private fun reorderPdfPages(uri: Uri) {
 //        var inputPdf: InputStream? = null
