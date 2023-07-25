@@ -145,7 +145,14 @@ class MediaUtil {
         }
 
         private fun getRealPathFromURI(context: Context, imageUri: Uri): String {
-            return getFilePathByUri(context, imageUri)!!
+            var filePath= ""
+            try {
+                filePath = getFilePathByUri(context, imageUri)!!
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            Log.e("filePath",filePath)
+            return filePath
         }
 
         private fun readPictureDegree(path: String): Int {
@@ -185,15 +192,19 @@ class MediaUtil {
 
 
         private fun getFilePathByUri(context: Context, uri: Uri): String? {
-            if ("content".equals(uri.scheme, ignoreCase = true)) {
-                val sdkVersion = Build.VERSION.SDK_INT
-                return if (sdkVersion >= 19) { // api >= 19
-                    getRealPathFromUriAboveApi19(context, uri)
-                } else { // api < 19
-                    getRealPathFromUriBelowAPI19(context, uri)
+            try {
+                if ("content".equals(uri.scheme, ignoreCase = true)) {
+                    val sdkVersion = Build.VERSION.SDK_INT
+                    return if (sdkVersion >= 19) { // api >= 19
+                        getRealPathFromUriAboveApi19(context, uri)
+                    } else { // api < 19
+                        getRealPathFromUriBelowAPI19(context, uri)
+                    }
+                } else if ("file".equals(uri.scheme, ignoreCase = true)) {
+                    return uri.path
                 }
-            } else if ("file".equals(uri.scheme, ignoreCase = true)) {
-                return uri.path
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
             return null
         }

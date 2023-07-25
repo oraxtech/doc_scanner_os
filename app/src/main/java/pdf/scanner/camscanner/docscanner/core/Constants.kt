@@ -39,14 +39,14 @@ object Constants {
                 SelectedTool.REORDER
             )
         )
-        itemsList.add(
-            ToolsFragmentRecyclerViewData(
-                5,
-                context.getString(R.string.fragment_tools_name_text_import_pdfs),
-                R.drawable.ic_import_pdf,
-                SelectedTool.IMPORT
-            )
-        )
+//        itemsList.add(
+//            ToolsFragmentRecyclerViewData(
+//                5,
+//                context.getString(R.string.fragment_tools_name_text_import_pdfs),
+//                R.drawable.ic_import_pdf,
+//                SelectedTool.IMPORT
+//            )
+//        )
 
         return itemsList
     }
