@@ -16,6 +16,7 @@ import android.widget.*
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.chip.Chip
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.vansuita.pickimage.dialog.PickImageDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +25,7 @@ import pdf.scanner.camscanner.docscanner.R
 import pdf.scanner.camscanner.docscanner.core.ImageState
 import pdf.scanner.camscanner.docscanner.core.IntentServices
 import pdf.scanner.camscanner.docscanner.core.MediaUtil
+import pdf.scanner.camscanner.docscanner.view.custom_views.CustomDialog
 
 class PDFConvertor : AppCompatActivity() {
     private lateinit var viewPager: ViewPager
@@ -36,13 +38,14 @@ class PDFConvertor : AppCompatActivity() {
         setContentView(R.layout.activity_pdfconvertor)
         viewPager = findViewById(R.id.pdf_converter_layout_view_pager)
         convertButton = findViewById(R.id.pdf_converter_layout_button_convert)
-        convertButton.setOnClickListener{
-         //   onConvertButtonPressed()
+        convertButton.setOnClickListener {
+            onConvertButtonPressed()
         }
         setUpProgressBar()
         setUpToolBar()
         setView()
     }
+
     private fun setUpProgressBar() {
         progressDialog = ProgressDialog(this)
         progressDialog.setTitle(getString(R.string.text_progress_bar_please_wait))
@@ -56,7 +59,8 @@ class PDFConvertor : AppCompatActivity() {
     }
 
     private fun setUpToolBar() {
-        val toolBar : androidx.appcompat.widget.Toolbar = findViewById(R.id.activity_pdf_converter_toolbar)
+        val toolBar: androidx.appcompat.widget.Toolbar =
+            findViewById(R.id.activity_pdf_converter_toolbar)
         setSupportActionBar(toolBar)
         if (supportActionBar != null) {
             supportActionBar!!.setDisplayHomeAsUpEnabled(true)
@@ -66,6 +70,7 @@ class PDFConvertor : AppCompatActivity() {
             onBackPressed()
         }
     }
+
     private fun setUpViewPager() {
 
         viewPager.offscreenPageLimit = imagesList.size
@@ -73,31 +78,41 @@ class PDFConvertor : AppCompatActivity() {
             PDFConverterActivityViewPagerAdapter(this@PDFConvertor, imagesList)
     }
 
-//    private fun onConvertButtonPressed(){
-//        progressDialog.setMessage(getString(R.string.text_progress_dialog_converting_to_pdf))
-//        progressDialog.show()
-//        val bitmapList = ArrayList<Bitmap>()
-//        for (i in imagesList){
-//            bitmapList.add(if (i.editedBitmap != null) {
-//                i.editedBitmap!!
-//            } else {
-//                i.bitmap!!
-//            })
-//        }
-//        val handler = Handler(Looper.getMainLooper())
-//        CoroutineScope(Dispatchers.IO).launch  {
-//            MediaUtil.createPdf(applicationContext,bitmapList)
-//            Log.e(ContentValues.TAG, "Converted...")
-//            progressDialog.dismiss()
-//            val uri = Uri.parse(
-//                "${Environment.getExternalStorageDirectory().path}/Documents/My PDFs/"
-//            )
-//            val intent = Intent(Intent.ACTION_VIEW)
-//
-//            intent.setDataAndType(uri, "*/*")
-//            startActivity(Intent.createChooser(intent, "Open folder"))}
-//        handler.post{
-//            Toast.makeText(this, "Converted...", Toast.LENGTH_SHORT).show()
-//        }
-//    }
+    private fun onConvertButtonPressed() {
+      try  {
+            progressDialog.setMessage(getString(R.string.text_progress_dialog_converting_to_pdf))
+            progressDialog.show()
+            val bitmapList = ArrayList<Bitmap>()
+            for (i in imagesList) {
+                bitmapList.add(
+                    if (i.editedBitmap != null) {
+                        i.editedBitmap!!
+                    } else {
+                        i.bitmap!!
+                    }
+                )
+            }
+            val handler = Handler(Looper.getMainLooper())
+            CoroutineScope(Dispatchers.IO).launch {
+                MediaUtil.createPdf(applicationContext, bitmapList)
+                Log.e(ContentValues.TAG, "Converted...")
+                progressDialog.dismiss()
+                val uri = Uri.parse(
+                    "${Environment.getExternalStorageDirectory().path}/Documents/My PDFs/"
+                )
+                val intent = Intent(Intent.ACTION_VIEW)
+
+                intent.setDataAndType(uri, "*/*")
+                startActivity(Intent.createChooser(intent, "Open folder"))
+                handler.post {
+                    Toast.makeText(this@PDFConvertor, "Converted...", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }catch (e: Exception){
+          CustomDialog(this,"Error",e.message,"Ok"){
+          }.show()
+          FirebaseCrashlytics.getInstance().recordException(e)
+      }
+
+    }
 }

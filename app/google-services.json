@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "1021835942834",
+    "project_id": "doc-scanner-app-3e146",
+    "storage_bucket": "doc-scanner-app-3e146.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1021835942834:android:7a991646f9f853743862ab",
+        "android_client_info": {
+          "package_name": "com.example.doc_scanner_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1021835942834-nlttf4ulu1mdlgk5tvem3r86ip00n6hh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTYhT46NfHrHL9UEA80ll4sp0ycKIWLTc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1021835942834-nlttf4ulu1mdlgk5tvem3r86ip00n6hh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1021835942834:android:2ff5780beb022c3c3862ab",
+        "android_client_info": {
+          "package_name": "pdf.scanner.camscanner.docscanner"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1021835942834-nlttf4ulu1mdlgk5tvem3r86ip00n6hh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTYhT46NfHrHL9UEA80ll4sp0ycKIWLTc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1021835942834-nlttf4ulu1mdlgk5tvem3r86ip00n6hh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

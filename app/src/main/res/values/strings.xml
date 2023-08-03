@@ -15,4 +15,8 @@
     <string name="fragment_tools_name_text_protect_pdf">Protect PDF</string>
     <string name="fragment_tools_name_text_reorder_pdf">Reorder PDF</string>
     <string name="fragment_tools_name_text_import_pdfs">Import PDFs</string>
+    <string name="custom_dialog_title_text_demo">Demo</string>
+    <string name="custom_dialog_body_text_demo">demo Body</string>
+    <string name="custom_dialog_button_text_yes">yes</string>
+    <string name="custom_dialog_button_text_no">no</string>
 </resources>

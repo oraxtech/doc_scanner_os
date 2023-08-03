@@ -13,6 +13,10 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
 import androidx.core.content.FileProvider
+import com.itextpdf.io.image.ImageDataFactory
+import com.itextpdf.kernel.pdf.PdfDocument
+import com.itextpdf.kernel.pdf.PdfWriter
+import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Image
 
 import id.zelory.compressor.Compressor
@@ -365,54 +369,54 @@ class MediaUtil {
 //            return Bitmap.createScaledBitmap(image, targetWidth, targetHeight, true)
 //        }
 
-//        fun createPdf(context: Context, bitmaps: List<Bitmap>) {
-//            val file = ExternalStorageUtil.getOutputFile(context, "My PDFs/Images to PDF")
-//            val fileOutputStream = FileOutputStream(file)
-//
-//            //  val pageSize = PageSize.A4
-//            //   val pdf = PdfDocument()
-//            val document = Document(PageSize.A4)
-//            val pdfWriter = PdfWriter.getInstance(document, fileOutputStream)
-//
-//            //  pdfWriter.setFullCompression()
-//            pdfWriter.compressionLevel = 9
-//            //  pdf.defaultPageSize = PageSize.A4
-////            pdf.open()
-//            CoroutineScope(Dispatchers.IO).launch {
-//                //  try {
-//                document.open()
-//                // val contentByte = pdfWriter.directContent
-//
-//                for (i in bitmaps) {
-//                    val fileFromBitmap = persistImage(i, "temp")
-//
-//                    val compressedImageFile = Compressor.compress(context, fileFromBitmap) {
-//                        resolution(1700, 2300)
-//                        quality(80)
-//                        format(Bitmap.CompressFormat.JPEG)
-//                        size(2_097_152)
-//                    }
-//                    val image = Image(compressedImageFile)
-//
-//                    image.scaleToFit(document.pageSize.width, document.pageSize.height)
-//                    val x = (PageSize.A4.width - image.scaledWidth) / 2
-//                    val y = (PageSize.A4.height - image.scaledHeight) / 2
-//                    image.setAbsolutePosition(x, y)
-//                    document.newPage()
-//                    document.add(image)
-//
-//                }
-////                } catch (e: Exception) {
-////                    e.printStackTrace()
-////                } finally {
-//                document.close()
-//                pdfWriter.close()
-//                //  pdf.close()
-//                // }
-//            }
-//        }
+        fun createPdf(context: Context, bitmaps: List<Bitmap>) {
+            val file = ExternalStorageUtil.getOutputFile(context, "My PDFs/Image to pdfs")
+            val fileOutputStream = FileOutputStream(file)
 
+            //  val pageSize = PageSize.A4
+            //   val pdf = PdfDocument()
 
+            val pdfWriter = PdfWriter(fileOutputStream)
+            val pdfDocument = PdfDocument(pdfWriter)
+            val document = Document(pdfDocument)
+            //  pdfWriter.setFullCompression()
+            // pdfWriter.compressionLevel = 9
+            //  pdf.defaultPageSize = PageSize.A4
+//            pdf.open()
+            CoroutineScope(Dispatchers.IO).launch {
+                //  try {
+                // val contentByte = pdfWriter.directContent
+
+                for (i in bitmaps) {
+                    val fileFromBitmap = persistImage(i, "temp")
+
+                    val compressedImageFile = Compressor.compress(context, fileFromBitmap) {
+                        resolution(1700, 2300)
+                        quality(80)
+                        format(Bitmap.CompressFormat.JPEG)
+                        size(2_097_152)
+                    }
+                    val imageData = ImageDataFactory.create(compressedImageFile.path)
+                    val image = Image(imageData)
+
+                    pdfDocument.addNewPage()
+
+                    image.scaleToFit(pdfDocument.defaultPageSize.width,pdfDocument.defaultPageSize.height)
+                    val x: Float = (pdfDocument.defaultPageSize.width - image.imageScaledWidth) / 2
+                    val y: Float = (pdfDocument.defaultPageSize.height - image.imageScaledHeight) / 2
+
+                    image.setFixedPosition(bitmaps.indexOf(i) + 1,x,y)
+
+                    document.add(image)
+
+                }
+
+                document.close()
+                pdfWriter.close()
+                pdfDocument.close()
+
+            }
+        }
         private fun toByteArray(bitmap: Bitmap): ByteArray {
             val stream = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
@@ -422,8 +426,10 @@ class MediaUtil {
         }
 
         private fun persistImage(bitmap: Bitmap, name: String): File {
-            val filesDir: File = Environment.getExternalStorageDirectory()
-            val imageFile = File(filesDir, "$name.jpg")
+            val filesDir: File = File("${ Environment.getExternalStorageDirectory() }/Download")
+            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+            val imageFileName = "image_$timestamp.jpg"
+            val imageFile = File(filesDir, imageFileName)
             val os: OutputStream
             try {
                 os = FileOutputStream(imageFile)
