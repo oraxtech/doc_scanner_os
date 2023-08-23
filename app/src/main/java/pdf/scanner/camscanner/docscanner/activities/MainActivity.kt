@@ -1,5 +1,6 @@
 package pdf.scanner.camscanner.docscanner.activities
 
+import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.Bitmap
 
@@ -13,6 +14,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -29,6 +31,10 @@ import com.itextpdf.kernel.utils.PdfSplitter
 import com.vansuita.pickimage.bundle.PickSetup
 import com.vansuita.pickimage.dialog.PickImageDialog
 import com.vansuita.pickimage.listeners.IPickClick
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 
 import pdf.scanner.camscanner.docscanner.R
@@ -37,13 +43,17 @@ import pdf.scanner.camscanner.docscanner.databinding.ActivityMainBinding
 import pdf.scanner.camscanner.docscanner.view.custom_views.CustomDialog
 import java.io.FileOutputStream
 import java.io.InputStream
+import java.io.OutputStream
 import java.security.Security
 
 
 class MainActivity : AppCompatActivity() {
     private var floatingButton: FloatingActionButton? = null
     private var pickImageDialog: PickImageDialog? = null
+    private var mSelectedFolder: DocumentFile? = null
     private lateinit var binding: ActivityMainBinding
+    private lateinit var progressDialog: ProgressDialog
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +65,54 @@ class MainActivity : AppCompatActivity() {
         floatingButton!!.setOnClickListener {
             onFloatingButtonPressed()
         }
+        openSAFPicker()
+        setUpProgressBar()
     }
+
+    private fun setUpProgressBar() {
+        progressDialog = ProgressDialog(this)
+        progressDialog.setTitle(getString(R.string.text_progress_bar_please_wait))
+        progressDialog.setCanceledOnTouchOutside(false)
+    }
+
+    private fun openSAFPicker() {
+        val sharedPreferences = getSharedPreferences("MyAppPreferences", MODE_PRIVATE)
+        val selectedFolderUriString = sharedPreferences.getString("selectedFolderUri", null)
+        Log.e("SelectedFolderUriString", selectedFolderUriString.isNullOrEmpty().toString())
+        if (selectedFolderUriString != null) {
+            // Convert the URI string back to a Uri object
+            val selectedFolderUri = Uri.parse(selectedFolderUriString)
+
+            mSelectedFolder = DocumentFile.fromTreeUri(this, selectedFolderUri)
+
+        } else {
+            CustomDialog(
+                this,
+                "Select Folder",
+                "Please select a folder where you need to save your work.",
+                "ok"
+            ) {
+                openDocumentTree.launch(null)
+            }.show()
+        }
+
+    }
+
+    private val openDocumentTree =
+        registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+            // Once the user selects a folder, the URI is returned here
+            if (uri != null) {
+                // You can access the selected folder using DocumentFile
+                mSelectedFolder = DocumentFile.fromTreeUri(this, uri)
+                // Now, you can perform file operations on the selected folder
+                // For example, creating new files, reading existing files, etc.
+                val sharedPreferences = getSharedPreferences("MyAppPreferences", MODE_PRIVATE)
+                sharedPreferences.edit()
+                    .putString("selectedFolderUri", mSelectedFolder?.uri.toString()).apply()
+            } else {
+                // User canceled or an error occurred
+            }
+        }
 
     private fun setRecyclerView() {
         val adapter = ToolsFragmentRecyclerViewAdapter(
@@ -206,8 +263,8 @@ class MainActivity : AppCompatActivity() {
                                     null
                                 ) {
 //                                    try {
-                                       // throw Exception("Test Crash blah blah blah")
-                                        mergePDF(listOfInputStream)
+                                    // throw Exception("Test Crash blah blah blah")
+                                    mergePDF(listOfInputStream)
 //                                    } catch (e: Exception) {
 //                                        CustomDialog(this, "Error", e.message, "Ok") {
 //                                        }.show()
@@ -346,45 +403,66 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun mergePDF(listOfInputStreamPdf: List<InputStream>) {
-        try {
-            val file = ExternalStorageUtil.getOutputFile(this, "My PDFs/Merged")
-            val fileOutputStream = FileOutputStream(file)
 
-            val pdfDocument =
-                PdfDocument(
-                    PdfReader(
-                        listOfInputStreamPdf[0]
-                    ),
-                    PdfWriter(fileOutputStream)
-                )
-            val merger = PdfMerger(pdfDocument)
+        //  val file = ExternalStorageUtil.getOutputFile(this, "My PDFs/Merged")
+//            val fileOutputStream = FileOutputStream(file.uri)
 
-            for (i in listOfInputStreamPdf.indices) {
-                val pdfNumber = i + 1
-                if (pdfNumber in listOfInputStreamPdf.indices) {
-                    val mergePdfDocument = PdfDocument(
-                        PdfReader(
-                            listOfInputStreamPdf[pdfNumber],
-                        )
-                    )
-                    merger.merge(mergePdfDocument, 1, mergePdfDocument.numberOfPages)
-                    mergePdfDocument.close()
-                    listOfInputStreamPdf[pdfNumber].close()
+        var file: DocumentFile? = null
+        var fileOutputStream: OutputStream? = null
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                withContext(Dispatchers.Main) {
+                    progressDialog.setMessage("Merging PDFs")
+                    progressDialog.show()
                 }
+                file = ExternalStorageUtil.createNewFolder(mSelectedFolder, "Merged PDFs")
+                fileOutputStream = file?.uri?.let { contentResolver.openOutputStream(it) }
+
+
+                val pdfDocument =
+                    PdfDocument(
+                        PdfReader(
+                            listOfInputStreamPdf[0]
+                        ),
+                        PdfWriter(fileOutputStream)
+                    )
+                val merger = PdfMerger(pdfDocument)
+
+                for (i in listOfInputStreamPdf.indices) {
+                    val pdfNumber = i + 1
+                    if (pdfNumber in listOfInputStreamPdf.indices) {
+                        val mergePdfDocument = PdfDocument(
+                            PdfReader(
+                                listOfInputStreamPdf[pdfNumber],
+                            )
+                        )
+                        merger.merge(mergePdfDocument, 1, mergePdfDocument.numberOfPages)
+                        mergePdfDocument.close()
+                        listOfInputStreamPdf[pdfNumber].close()
+                    }
+                }
+
+                pdfDocument.close()
+                fileOutputStream?.close()
+                // Show a message or perform any other action after successful merging
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, "Merged using itext 7", Toast.LENGTH_SHORT)
+                        .show()
+                    progressDialog.dismiss()
+                }
+
+
+            } catch (e: Exception) {
+                e.printStackTrace();
+                withContext(Dispatchers.Main) {
+                    CustomDialog(this@MainActivity, "Error", e.message, "Ok") {
+                    }.show()
+                    progressDialog.dismiss()
+                }
+
+                FirebaseCrashlytics.getInstance().recordException(e)
+                // Handle the error appropriately
             }
-
-            pdfDocument.close()
-            fileOutputStream.close()
-            // Show a message or perform any other action after successful merging
-            Toast.makeText(this, "Merged using itext 7", Toast.LENGTH_SHORT).show()
-            Log.d("PDF Merge", "PDF files merged successfully!")
-        } catch (e: Exception) {
-            e.printStackTrace();
-
-            CustomDialog(this, "Error", e.message, "Ok") {
-            }.show()
-            FirebaseCrashlytics.getInstance().recordException(e)
-            // Handle the error appropriately
         }
     }
 
@@ -393,107 +471,168 @@ class MainActivity : AppCompatActivity() {
         listOfInputStreamPdf: List<InputStream>,
         pageNumbers: List<Int>
     ) {
-        try {
-            val file = ExternalStorageUtil.getOutputFile(this, "My PDFs/Extracted")
-            val fileOutputStream = FileOutputStream(file)
-
-            val reader = PdfReader(listOfInputStreamPdf[0])
-
-            // Create a PdfDocument object for the input PDF
-            val document = PdfDocument(reader)
-
-            // Create a PdfWriter object for the output PDF
-            val writer = PdfWriter(fileOutputStream)
-
-            // Create a new PdfDocument object for the output PDF
-            val outputDocument = PdfDocument(writer)
-
+//            val file = ExternalStorageUtil.getOutputFile(this, "My PDFs/Extracted")
+//            val fileOutputStream = FileOutputStream(file)
+        var file: DocumentFile? = null
+        var fileOutputStream: OutputStream? = null
+        CoroutineScope(Dispatchers.IO).launch {
             try {
-                // Iterate through the page numbers and copy them to the output document
-                for (pageNum in pageNumbers) {
-                    if (pageNum >= 1 && pageNum <= document.numberOfPages) {
-                        val page = document.getPage(pageNum)
-                        outputDocument.addPage(page.copyTo(outputDocument))
-                    }
+                withContext(Dispatchers.Main) {
+                    progressDialog.setMessage("Extracting Pages")
+                    progressDialog.show()
                 }
-                listOfInputStreamPdf[0].close()
-                Toast.makeText(this, "Extracted using itext 7", Toast.LENGTH_SHORT).show()
+                file = ExternalStorageUtil.createNewFolder(mSelectedFolder, "Extracted PDFs")
+                fileOutputStream = file?.uri?.let { contentResolver.openOutputStream(it) }
 
-            } finally {
-                // Close all the PdfDocument objects to release resources
-                outputDocument.close()
-                document.close()
+                val reader = PdfReader(listOfInputStreamPdf[0])
+
+                // Create a PdfDocument object for the input PDF
+                val document = PdfDocument(reader)
+
+                // Create a PdfWriter object for the output PDF
+                val writer = PdfWriter(fileOutputStream)
+
+                // Create a new PdfDocument object for the output PDF
+                val outputDocument = PdfDocument(writer)
+
+                try {
+                    // Iterate through the page numbers and copy them to the output document
+                    for (pageNum in pageNumbers) {
+                        if (pageNum >= 1 && pageNum <= document.numberOfPages) {
+                            val page = document.getPage(pageNum)
+                            outputDocument.addPage(page.copyTo(outputDocument))
+                        }
+                    }
+                    listOfInputStreamPdf[0].close()
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Extracted using itext 7",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    progressDialog.dismiss()
+
+
+                } finally {
+                    // Close all the PdfDocument objects to release resources
+                    outputDocument.close()
+                    document.close()
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    CustomDialog(this@MainActivity, "Error", e.message, "Ok") {
+                    }.show()
+                    progressDialog.dismiss()
+                }
+
+                FirebaseCrashlytics.getInstance().recordException(e)
             }
-        } catch (e: Exception) {
-            CustomDialog(this, "Error", e.message, "Ok") {
-            }.show()
-            FirebaseCrashlytics.getInstance().recordException(e)
         }
-
     }
 
     private fun reorderPdfPages(listOfInputStreamPdf: List<InputStream>, newPageOrder: List<Int>) {
-        try {
-            val file = ExternalStorageUtil.getOutputFile(this, "My PDFs/Reordered")
-            val fileOutputStream = FileOutputStream(file)
+//            val file = ExternalStorageUtil.getOutputFile(this, "My PDFs/Reordered")
+//            val fileOutputStream = FileOutputStream(file)
+        var file: DocumentFile? = null
+        var fileOutputStream: OutputStream? = null
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                withContext(Dispatchers.Main) {
+                    progressDialog.setMessage("Reordering Pages")
+                    progressDialog.show()
+                }
+                file = ExternalStorageUtil.createNewFolder(mSelectedFolder, "Reordered PDFs")
+                fileOutputStream = file?.uri?.let { contentResolver.openOutputStream(it) }
 
-            val reader = PdfReader(listOfInputStreamPdf[0])
+                val reader = PdfReader(listOfInputStreamPdf[0])
 
-            // Create a PdfDocument object for the input PDF
-            val document = PdfDocument(reader)
+                // Create a PdfDocument object for the input PDF
+                val document = PdfDocument(reader)
 
-            // Create a PdfWriter object for the output PDF
-            val writer = PdfWriter(fileOutputStream)
+                // Create a PdfWriter object for the output PDF
+                val writer = PdfWriter(fileOutputStream)
 
-            // Create a new PdfDocument object for the output PDF
-            val outputDocument = PdfDocument(writer)
-            outputDocument.initializeOutlines()
-            val totalPages = document.numberOfPages
+                // Create a new PdfDocument object for the output PDF
+                val outputDocument = PdfDocument(writer)
+                outputDocument.initializeOutlines()
+                val totalPages = document.numberOfPages
 
-            if (totalPages >= 2) {
-                val tempPages = (1..totalPages).toList().shuffled()
+                if (totalPages >= 2) {
+                    val tempPages = (1..totalPages).toList().shuffled()
 
-                document.copyPagesTo(tempPages, outputDocument)
+                    document.copyPagesTo(tempPages, outputDocument)
+                }
+
+                document.close()
+                outputDocument.close()
+                fileOutputStream?.close()
+                listOfInputStreamPdf[0].close()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, "Reordered using itext 7", Toast.LENGTH_SHORT)
+                        .show()
+                    progressDialog.dismiss()
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    CustomDialog(this@MainActivity, "Error", e.message, "Ok") {
+                    }.show()
+                    progressDialog.dismiss()
+                }
+
+                FirebaseCrashlytics.getInstance().recordException(e)
+
             }
-
-            document.close()
-            outputDocument.close()
-            fileOutputStream.close()
-            listOfInputStreamPdf[0].close()
-            Toast.makeText(this, "Reordered using itext 7", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            CustomDialog(this, "Error", e.message, "Ok") {
-            }.show()
-            FirebaseCrashlytics.getInstance().recordException(e)
-
         }
 
     }
 
     private fun protectPdf(listOfInputStreamPdf: List<InputStream>) {
-        try {
-            val file = ExternalStorageUtil.getOutputFile(this, "My PDFs/Protected")
-            val fileOutputStream = FileOutputStream(file)
-            val pdfReader = PdfReader(listOfInputStreamPdf[0])
-            val writerProperties = WriterProperties()
-            writerProperties.setStandardEncryption(
-                "user".toByteArray(),
-                "Owner".toByteArray(),
-                EncryptionConstants.ALLOW_PRINTING,
-                EncryptionConstants.ENCRYPTION_AES_128
-            )
-            val pdfWriter = PdfWriter(fileOutputStream, writerProperties)
-            val pdfDocument = PdfDocument(pdfReader, pdfWriter)
-            pdfDocument.close()
-            fileOutputStream.close()
-            listOfInputStreamPdf[0].close()
-            pdfReader.close()
-            pdfWriter.close()
-            Toast.makeText(this, "Protected using itext 7", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            CustomDialog(this, "Error", e.message, "Ok") {
-            }.show()
-            FirebaseCrashlytics.getInstance().recordException(e)
+//            val file = ExternalStorageUtil.getOutputFile(this, "My PDFs/Protected")
+//            val fileOutputStream = FileOutputStream(file)
+        var file: DocumentFile? = null
+        var fileOutputStream: OutputStream? = null
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+
+                withContext(Dispatchers.Main) {
+                    progressDialog.setMessage("Protecting PDFs")
+                    progressDialog.show()
+                }
+                file = ExternalStorageUtil.createNewFolder(mSelectedFolder, "Protected PDF")
+                fileOutputStream = file?.uri?.let { contentResolver.openOutputStream(it) }
+                val pdfReader = PdfReader(listOfInputStreamPdf[0])
+                val writerProperties = WriterProperties()
+                writerProperties.setStandardEncryption(
+                    "user".toByteArray(),
+                    "Owner".toByteArray(),
+                    EncryptionConstants.ALLOW_PRINTING,
+                    EncryptionConstants.ENCRYPTION_AES_128
+                )
+                val pdfWriter = PdfWriter(fileOutputStream, writerProperties)
+                val pdfDocument = PdfDocument(pdfReader, pdfWriter)
+                pdfDocument.close()
+                fileOutputStream?.close()
+                listOfInputStreamPdf[0].close()
+                pdfReader.close()
+                pdfWriter.close()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, "Protected using itext 7", Toast.LENGTH_SHORT)
+                        .show()
+                    progressDialog.dismiss()
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    CustomDialog(this@MainActivity, "Error", e.message, "Ok") {
+                    }.show()
+                    progressDialog.dismiss()
+                }
+
+                FirebaseCrashlytics.getInstance().recordException(e)
+            }
         }
 
     }
